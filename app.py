@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, render_template
 import joblib
 import sqlite3
 import numpy as np
-import os
+import datetime
 
 app = Flask(__name__)
 
@@ -15,7 +15,8 @@ le_occup = joblib.load('le_occup.pkl')
 def init_db():
     conn = sqlite3.connect('sleep_data.db')
     c = conn.cursor()
-    c.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, prediction TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)")
+    # Create table if it doesn't exist
+    c.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, prediction TEXT, timestamp TEXT)")
     conn.commit()
     conn.close()
 
@@ -51,9 +52,17 @@ def predict():
         if prediction == 'Insomnia': insight = "Limit night screen time. Try blue light filters."
         elif prediction == 'Sleep Apnea': insight = "High risk detected. Please consult a doctor."
 
+        # --- NEW CODE: SAVE TO DATABASE ---
+        conn = sqlite3.connect('sleep_data.db')
+        c = conn.cursor()
+        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        c.execute("INSERT INTO users (prediction, timestamp) VALUES (?, ?)", (prediction, current_time))
+        conn.commit()
+        conn.close()
+        # ----------------------------------
+
         return jsonify({'prediction': prediction, 'insight': insight})
     except Exception as e:
-        print("ERROR:", e)
         return jsonify({'error': str(e)}), 500
 
 if __name__ == "__main__":
