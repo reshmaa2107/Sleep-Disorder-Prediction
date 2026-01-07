@@ -2,126 +2,178 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sleep Disorder Prediction</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Montserrat:wght@700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --bg-color: #FDF2F8; --card-bg: rgba(255, 255, 255, 0.9); }
-        body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #FDF2F8 0%, #E0F2FE 100%); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
-        .dashboard-container { background: var(--card-bg); backdrop-filter: blur(12px); border-radius: 24px; padding: 30px; width: 100%; max-width: 900px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
+        /* --- FIXED CSS STARTS HERE --- */
+        :root { --bg-color: #FDF2F8; --card-bg: rgba(255, 255, 255, 0.95); }
         
+        * { box-sizing: border-box; } /* Prevents padding from breaking layout */
+
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background: linear-gradient(135deg, #FDF2F8 0%, #E0F2FE 100%); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 20px; 
+        }
+
+        .dashboard-container { 
+            background: var(--card-bg); 
+            border-radius: 24px; 
+            padding: 40px; 
+            width: 100%; 
+            max-width: 900px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1); 
+        }
+
         h1 { font-family: 'Montserrat', sans-serif; color: #8B5CF6; margin-bottom: 5px; text-align: center; }
         .subtitle { color: #6B7280; font-size: 0.9rem; margin-bottom: 30px; text-align: center; display: block; }
-        
-        /* Section Headers */
-        .section-title { color: #EC4899; font-size: 1rem; font-weight: bold; margin-top: 20px; margin-bottom: 10px; border-bottom: 2px solid #FCE7F3; padding-bottom: 5px; grid-column: span 2; }
 
-        /* Grid Layout */
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        
-        /* Mobile responsive: Stack columns on small screens */
-        @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+        .section-title { 
+            color: #EC4899; 
+            font-size: 1.1rem; 
+            font-weight: bold; 
+            margin-top: 25px; 
+            margin-bottom: 15px; 
+            border-bottom: 2px solid #FCE7F3; 
+            padding-bottom: 5px; 
+            grid-column: 1 / -1; /* Forces title to span full width */
+        }
 
-        label { font-size: 0.8rem; font-weight: 600; color: #374151; display: block; margin-bottom: 4px; }
-        input, select { width: 100%; padding: 10px; border: 2px solid #E5E7EB; border-radius: 10px; box-sizing: border-box; font-family: inherit; }
+        /* SMART GRID: Automatically stacks columns if space is tight */
+        .form-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 20px; 
+            align-items: end; /* Aligns inputs nicely */
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label { font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 8px; }
+        
+        input, select { 
+            width: 100%; 
+            padding: 12px; 
+            border: 2px solid #E5E7EB; 
+            border-radius: 10px; 
+            font-family: inherit; 
+            font-size: 0.95rem;
+            background: #fff;
+        }
+        
         input:focus, select:focus { border-color: #C4B5FD; outline: none; }
-        
-        .analyze-btn { grid-column: span 2; width: 100%; padding: 15px; background: linear-gradient(to right, #C4B5FD, #86EFAC); border: none; border-radius: 12px; color: white; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 20px; transition: transform 0.2s; box-shadow: 0 4px 15px rgba(134, 239, 172, 0.4); }
-        .analyze-btn:hover { transform: scale(1.02); }
 
-        /* Results */
-        #result-box { display: none; margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ccc; text-align: center; animation: fadeIn 0.5s; }
-        .prediction-badge { padding: 10px 30px; border-radius: 50px; color: white; font-weight: bold; font-size: 1.5rem; display: inline-block; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .bg-healthy { background-color: #6EE7B7; } 
-        .bg-insomnia { background-color: #FCA5A5; } 
-        .bg-apnea { background-color: #FDBA74; }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .analyze-btn { 
+            grid-column: 1 / -1; /* Button spans full width */
+            width: 100%; 
+            padding: 18px; 
+            background: linear-gradient(to right, #C4B5FD, #86EFAC); 
+            border: none; 
+            border-radius: 12px; 
+            color: white; 
+            font-weight: bold; 
+            font-size: 1.1rem; 
+            cursor: pointer; 
+            margin-top: 30px; 
+            transition: transform 0.2s; 
+            box-shadow: 0 4px 15px rgba(134, 239, 172, 0.4); 
+        }
+        .analyze-btn:hover { transform: scale(1.02); }
     </style>
 </head>
 <body>
-
 <div class="dashboard-container">
     <h1>Sleep Disorder Prediction</h1>
-    <span class="subtitle">VIA SMARTPHONE SCREEN TIME PATTERNS</span>
-
-    <form id="predictionForm">
+    <span class="subtitle">ENTER YOUR DETAILS TO ANALYZE PATTERNS</span>
+    
+    <form action="/predict" method="POST">
         <div class="form-grid">
+            
             <div class="section-title">👤 Personal Information</div>
             
-            <div>
+            <div class="input-group">
                 <label>Age</label>
-                <input type="number" id="age" value="24" required>
+                <input type="number" name="age" value="24" required>
             </div>
-            <div>
+            <div class="input-group">
                 <label>Gender</label>
-                <select id="gender">
+                <select name="gender">
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
                 </select>
             </div>
-            <div>
+            <div class="input-group">
                 <label>Occupation</label>
-                <select id="occupation">
+                <select name="occupation">
                     <option value="Student">Student</option>
                     <option value="Engineer">Software Engineer</option>
                     <option value="Doctor">Doctor</option>
                     <option value="Manager">Manager</option>
-                    <option value="Artist">Artist/Creative</option>
+                    <option value="Nurse">Nurse</option>
+                    <option value="Nurse">Teacher</option>
+                    <option value="Nurse">Others</option>
+
                 </select>
             </div>
-            <div>
-                <label>BMI (Body Mass Index)</label>
-                <input type="number" step="0.1" id="bmi" value="22.5" placeholder="e.g. 22.0">
+            <div class="input-group">
+                <label>BMI</label>
+                <input type="number" step="0.1" name="bmi" value="22.5">
             </div>
 
             <div class="section-title">📱 Screen Time & Habits</div>
-
-            <div>
-                <label>Daily Screen Time (Hours)</label>
-                <input type="number" step="0.1" id="daily_screen" value="6.0" required>
+            
+            <div class="input-group">
+                <label>Daily Screen Time (Hrs)</label>
+                <input type="number" step="0.1" name="daily_screen" value="6.0" required>
             </div>
-            <div>
-                <label>Nighttime Usage (10 PM - 5 AM)</label>
-                <input type="number" step="0.1" id="night_screen" value="1.0" required>
+            <div class="input-group">
+                <label>Nighttime Usage (Hrs)</label>
+                <input type="number" step="0.1" name="night_screen" value="1.0" required>
             </div>
-            <div>
-                <label>Blue Light Filter Used?</label>
-                <select id="blue_light">
+            <div class="input-group">
+                <label>Blue Light Filter?</label>
+                <select name="blue_light">
                     <option value="0">No</option>
                     <option value="1">Yes</option>
                 </select>
             </div>
-            <div>
-                <label>Physical Activity (Mins/Day)</label>
-                <input type="number" id="phys_act" value="30">
+            <div class="input-group">
+                <label>Phys. Activity (Mins)</label>
+                <input type="number" name="phys_act" value="30">
             </div>
 
-            <div class="section-title">❤️ Health & Sleep Metrics</div>
-
-            <div>
+            <div class="section-title">❤️ Health Metrics</div>
+            
+            <div class="input-group">
                 <label>Stress Level (1-10)</label>
-                <input type="number" id="stress" min="1" max="10" value="5">
+                <input type="number" name="stress" min="1" max="10" value="5">
             </div>
-            <div>
+            <div class="input-group">
                 <label>Heart Rate (BPM)</label>
-                <input type="number" id="heart_rate" value="72">
+                <input type="number" name="heart_rate" value="72">
             </div>
-            <div>
-                <label>Coffee Intake (Cups/Day)</label>
-                <input type="number" id="coffee" value="2">
+            <div class="input-group">
+                <label>Coffee Intake (Cups)</label>
+                <input type="number" name="coffee" value="2">
             </div>
-            <div>
-                <label>Do you Snore?</label>
-                <select id="snoring">
+            <div class="input-group">
+                <label>Snoring?</label>
+                <select name="snoring">
                     <option value="0">No</option>
                     <option value="1">Yes</option>
                 </select>
             </div>
-            <div>
+            <div class="input-group">
                 <label>Sleep Walking?</label>
-                <select id="night_walking">
+                <select name="night_walking">
                     <option value="0">No</option>
                     <option value="1">Yes</option>
                 </select>
@@ -130,84 +182,6 @@
             <button type="submit" class="analyze-btn">Analyze Patterns ✨</button>
         </div>
     </form>
-
-    <div id="result-box">
-        <h3>Prediction Result</h3>
-        <div id="predBadge" class="prediction-badge"></div>
-        <p id="insightText" style="color: #555; font-style: italic;"></p>
-        
-        <div style="height: 250px; width: 100%; margin-top: 20px;">
-            <canvas id="sleepChart"></canvas>
-        </div>
-    </div>
 </div>
-
-<script>
-    document.getElementById('predictionForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        // Gather all 13 visible inputs
-        const data = {
-            age: document.getElementById('age').value,
-            gender: document.getElementById('gender').value,
-            occupation: document.getElementById('occupation').value,
-            daily_screen: document.getElementById('daily_screen').value,
-            night_screen: document.getElementById('night_screen').value,
-            blue_light: document.getElementById('blue_light').value,
-            bmi: document.getElementById('bmi').value,
-            heart_rate: document.getElementById('heart_rate').value,
-            stress: document.getElementById('stress').value,
-            phys_act: document.getElementById('phys_act').value,
-            snoring: document.getElementById('snoring').value,
-            night_walking: document.getElementById('night_walking').value,
-            coffee: document.getElementById('coffee').value
-        };
-
-        try {
-            const response = await fetch('/predict', {
-                method: 'POST', 
-                headers: {'Content-Type': 'application/json'}, 
-                body: JSON.stringify(data)
-            });
-            const result = await response.json();
-            
-            if(result.error) { alert("Server Error: " + result.error); return; }
-
-            const resBox = document.getElementById('result-box');
-            resBox.style.display = 'block';
-            resBox.scrollIntoView({behavior: "smooth"});
-            
-            const badge = document.getElementById('predBadge');
-            badge.innerText = result.prediction;
-            badge.className = 'prediction-badge ' + (result.prediction === 'Healthy' ? 'bg-healthy' : result.prediction === 'Insomnia' ? 'bg-insomnia' : 'bg-apnea');
-            
-            document.getElementById('insightText').innerText = result.insight;
-
-            // Chart
-            const ctx = document.getElementById('sleepChart').getContext('2d');
-            if(window.myChart) window.myChart.destroy();
-            
-            window.myChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Your Stress', 'Avg Stress', 'Your Screen Time', 'Rec. Screen Time'],
-                    datasets: [{
-                        label: 'Analysis Comparison',
-                        data: [data.stress, 4, data.night_screen, 1.0],
-                        backgroundColor: ['#FCA5A5', '#6EE7B7', '#FDBA74', '#6EE7B7'],
-                        borderRadius: 5
-                    }]
-                },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true } }
-                }
-            });
-
-        } catch (err) { alert("Connection Failed. Make sure python app.py is running!"); }
-    });
-</script>
-
 </body>
 </html>
